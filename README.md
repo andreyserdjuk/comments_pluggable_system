@@ -15,4 +15,6 @@ Tested on PHP-5.6, MariaDB-10.0.16
 1. Apply schema.sql to database (be careful to avoid table names conflict - table prefixes has not been provided yet).
 2. Run "composer install" if you want to run unit tests or "composer dumpautoload".
 
-Read use-case client in the directory of the same name.
+If you want to run demo
+3. Set up you web server to pass all requests to /path-to/src/web-demo/index.php
+4. Make an entry in system hosts.

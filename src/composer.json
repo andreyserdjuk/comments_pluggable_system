@@ -5,7 +5,7 @@
   "autoload" : {
     "psr-4" : {
       "CommentsPluggableSystem\\" : "./CommentsPluggableSystem/",
-      "CommentsPluggableSystem\\CommentSystemUseCase\\" : "./use-case/"
+      "CommentsPluggableSystem\\CommentSystemUseCase\\" : "./web-demo/"
     }
   }
 }

@@ -2,7 +2,9 @@
 
 namespace CommentsPluggableSystem;
 use CommentsPluggableSystem\Events\SubmitEvent;
+use CommentsPluggableSystem\Exceptions\InvalidFormException;
 use CommentsPluggableSystem\Interfaces\CommentInterface;
+use CommentsPluggableSystem\Interfaces\CommentsTemplatePresenterInterface;
 use CommentsPluggableSystem\Interfaces\CommentSubjectInterface;
 
 /**
@@ -50,6 +52,13 @@ class Form extends EventManager
      */
     private $errors = [];
 
+    /**
+     * @var CommentsTemplatePresenter
+     */
+    private $commentsTemplate;
+
+
+    private $inputFormTemplate;
 
     /**
      * The Form instance can exist only with commented subject
@@ -93,7 +102,18 @@ class Form extends EventManager
 
         $this->loadObservers();
 
-        $this->fireEvent(SubmitEvent::NAME);
+        try {
+            $this->fireEvent(SubmitEvent::NAME);
+        } catch(InvalidFormException $e) {
+
+        }
+    }
+
+    public function handleSubmit()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $this->submit($_POST);
+        }
     }
 
     public function getPostData()
@@ -124,12 +144,31 @@ class Form extends EventManager
      */
     public function getComments()
     {
-        $sth = $this->dbh->prepare('SELECT * from comments where table_id = :table_id and subject_id = :subject_id');
+        $sth = $this->dbh->prepare('SELECT * from comments where table_id = :table_id and subject_id = :subject_id ORDER BY created_at DESC');
         $sth->bindValue(':table_id', $this->commentSubject->getTableId());
         $sth->bindValue(':subject_id', $this->commentSubject->getSubjectId());
         $sth->execute();
 
         return CommentHydrator::fetchObject($sth->fetchAll(\PDO::FETCH_ASSOC));
+    }
+
+    public function renderComments()
+    {
+        if (!($this->commentsTemplate instanceof CommentsTemplatePresenterInterface)) {
+            $this->setCommentsTemplate(new CommentsTemplatePresenter());
+        }
+
+        $this->commentsTemplate->setComments($this->getComments());
+        return $this->commentsTemplate->render();
+    }
+
+    public function renderInputForm()
+    {
+        if (!($this->inputFormTemplate instanceof InputFormTemplatePresenter)) {
+            $this->inputFormTemplate = new InputFormTemplatePresenter();
+        }
+
+        return $this->inputFormTemplate->render();
     }
 
     /**
@@ -196,5 +235,13 @@ class Form extends EventManager
         foreach ($sth->fetchAll(\PDO::FETCH_KEY_PAIR) as $observer => $eventName) {
             self::$instance->addObserver($eventName, new $observer);
         }
+    }
+
+    /**
+     * @param CommentsTemplatePresenterInterface $commentsTemplate
+     */
+    public function setCommentsTemplate(CommentsTemplatePresenterInterface $commentsTemplate)
+    {
+        $this->commentsTemplate = $commentsTemplate;
     }
 }

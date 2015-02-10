@@ -161,4 +161,18 @@ class Comment implements CommentInterface
     {
         $this->subjectId = $subjectId;
     }
+
+    /*public static function extractPostData($postData)
+    {
+        if (isset($postData[self::API_KEY_AUTHOR])
+            && isset($postData[self::API_KEY_TITLE])
+            && isset($postData[self::API_KEY_CONTENT])
+        ) {
+            return [
+                self::API_KEY_AUTHOR => $postData[self::API_KEY_AUTHOR],
+                self::API_KEY_TITLE => $postData[self::API_KEY_TITLE],
+                self::API_KEY_CONTENT => $postData[self::API_KEY_CONTENT],
+            ];
+        }
+    }*/
 }
